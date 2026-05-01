@@ -19,8 +19,12 @@ describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
 
-  const fillForm = (email = "email@email.com", password = "password123") => {
-    component.form.setValue({ email, password });
+  const mockForm = {
+    email: 'michel@gmail.com',
+    password: 'password123',
+  }
+  const fillForm = (overrides = {}) => {
+    component.form.setValue({ ...mockForm, ...overrides });
     fixture.detectChanges();
   }
 
@@ -28,6 +32,10 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   }
+
+  const getSubmitButton = (compiled: HTMLElement) =>
+    compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+
 
   const mockSessionInfo = {
     token: "token"
@@ -74,40 +82,40 @@ describe('LoginComponent', () => {
     expect(component.form.value).toEqual({ email: '', password: ''});
   });
 
+  it('should not display error message on init', () => {
+    expect(initComponent().querySelector('p.error')).toBeNull();
+  })
+
   it('should disable submit button if email is invalid', () => {
     const compiled = initComponent();
-    fillForm('not-an-email');
+    const submitButton = getSubmitButton(compiled);
 
-    const submitButton = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+    fillForm({ email: 'not-an-email'});
     expect(submitButton.disabled).toBe(true);
   });
 
   it('should disable submit button if password is invalid', () => {
     const compiled = initComponent();
-    fillForm("email@email.com", "pa");
+    const submitButton = getSubmitButton(compiled);
 
-    const submitButton = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+    fillForm({ password: "pa"});
     expect(submitButton.disabled).toBe(true);
   });
 
   it('should enable submit button if form is valid', () => {
     const compiled = initComponent();
-    fillForm();
+    const submitButton = getSubmitButton(compiled);
 
-    const submitButton = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+    fillForm();
     expect(submitButton.disabled).toBe(false);
   });
 
-  it('should not display error message on init', () => {
-    expect(initComponent().querySelector('p.error')).toBeNull();
-  })
-
   it('should display error message on failed submit', () => {
-    mockAuthService.login.mockReturnValueOnce(throwError(() => new Error('Unauthorized')))
     const compiled = initComponent();
-    fillForm();
+    const submitButton = getSubmitButton(compiled);
+    mockAuthService.login.mockReturnValueOnce(throwError(() => new Error('Unauthorized')))
 
-    const submitButton = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+    fillForm();
     submitButton.click();
     fixture.detectChanges();
 
@@ -115,16 +123,16 @@ describe('LoginComponent', () => {
   });
 
   it('should login and navigate on successful submit', () => {
+    const compiled = initComponent();
+    const submitButton = getSubmitButton(compiled);
     const navigateSpy = jest.spyOn(TestBed.inject(Router), 'navigate')
       .mockImplementation(() => Promise.resolve(true));
-    const compiled = initComponent();
-    fillForm();
 
-    const submitButton = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+    fillForm();
     submitButton.click();
     fixture.detectChanges();
 
-    expect(mockAuthService.login).toHaveBeenCalledWith({ email: "email@email.com", password: "password123" });
+    expect(mockAuthService.login).toHaveBeenCalledWith(mockForm);
     expect(mockSessionService.logIn).toHaveBeenCalledWith(mockSessionInfo);
     expect(navigateSpy).toHaveBeenCalledWith(['/sessions']);
   });
