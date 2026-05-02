@@ -101,7 +101,7 @@ describe('MeComponent', () => {
   });
 
   it('should call window.history.back when back arrow is clicked', () => {
-    const historySpy = jest.spyOn(window.history, 'back').mockImplementation(() => {})
+    const historySpy = jest.spyOn(window.history, 'back').mockImplementation(() => {});
     const backButton = initComponent().querySelector('button[mat-icon-button]') as HTMLButtonElement;
     backButton.click();
     expect(historySpy).toHaveBeenCalledTimes(1);
