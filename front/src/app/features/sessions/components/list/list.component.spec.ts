@@ -41,7 +41,7 @@ describe('ListComponent', () => {
       createdAt: new Date(),
       updatedAt: new Date()
     }
-  ]
+  ];
 
   const mockSessionApiService = {
     all: jest.fn().mockReturnValue(of(mockSessions))
