@@ -8,7 +8,7 @@ import {AuthService} from "../../services/auth.service";
 import {SessionService} from "../../../../services/session.service";
 import { expect } from '@jest/globals';
 import {Component, NgZone} from "@angular/core";
-import {MatCard, MatCardModule} from "@angular/material/card";
+import {MatCardModule} from "@angular/material/card";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -17,7 +17,7 @@ import {MatInputModule} from "@angular/material/input";
 @Component({ template: ''})
 class DummyComponent {}
 
-describe('Auth Flow - Integration', () => {
+describe('Auth Flow - Integration Test Suite', () => {
   let fixture: ComponentFixture<LoginComponent>;
   let component: LoginComponent;
   let httpMock: HttpTestingController;
