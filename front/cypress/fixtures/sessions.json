@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "test1",
+    "description": "test1",
+    "date": "2026-05-04",
+    "teacher_id": 1,
+    "users": [],
+    "createdAt": "2026-05-04",
+    "updatedAt": "2026-05-08"
+  },
+  {
+    "id": 2,
+    "name": "test2",
+    "description": "test2",
+    "date": "2026-05-08",
+    "teacher_id": 1,
+    "users": [],
+    "createdAt": "2026-05-08",
+    "updatedAt": "2026-05-08"
+  }
+]

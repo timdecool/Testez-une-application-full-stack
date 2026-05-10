@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "lastName": "Portique",
+    "firstName": "Miranda",
+    "createdAt": "2O26-05-08",
+    "updatedAt": "2O26-05-08"
+  },
+  {
+    "id": 2,
+    "lastName": "Boulon",
+    "firstName": "Michel",
+    "createdAt": "2O26-05-08",
+    "updatedAt": "2O26-05-08"
+  }
+]
