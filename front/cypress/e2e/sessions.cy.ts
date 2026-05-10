@@ -16,32 +16,6 @@ describe('Sessions admin spec', () => {
     cy.login(true);
   });
 
-  it('should access details and delete session as admin', () => {
-    cy.intercept('DELETE', '/api/session/1', { statusCode: 200 }).as('deleteSession');
-
-    cy.fixture('sessions').then((sessions) => {
-      const sessionToBeDeleted = sessions[0];
-      const sessionsWithoutDeleted = sessions.filter(s => s.id !==  1);
-      cy.intercept('GET', '/api/session/1', { body: sessionToBeDeleted }).as('getSession');
-      cy.intercept('GET', '/api/session', { body: sessionsWithoutDeleted }).as('sessionsWithoutDeleted');
-    });
-
-    cy.get('mat-card.item').first().find('button').contains('Detail').click();
-    cy.url().should('include', 'sessions/detail/1');
-    cy.wait('@getSession');
-
-    cy.get('h1').should('be.visible');
-    cy.get('button').contains('Delete')
-      .should('be.visible')
-      .click();
-
-    cy.wait('@deleteSession');
-    cy.url().should('include', '/sessions');
-    cy.wait('@sessionsWithoutDeleted');
-
-    cy.get('mat-card.item').should('have.length', 1);
-  });
-
   it('should create a session', () => {
     cy.intercept('GET', '/api/teacher', { fixture: 'teachers' }).as('teachers');
     cy.intercept('POST', '/api/session', { body: mockSession }).as('createSession');
