@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,13 +101,17 @@ public class SessionControllerTest {
             session1.setId(1L);
             sessionDtos.add(session1);
             SessionDto session2 = new SessionDto();
-            session1.setId(2L);
+            session2.setId(2L);
             sessionDtos.add(session2);
             when(sessionMapper.toDto(sessions)).thenReturn(sessionDtos);
 
             ResponseEntity<?> response = sessionController.findAll();
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(response.getBody()).isEqualTo(sessionDtos);
+            List<SessionDto> body = (List<SessionDto>) response.getBody();
+            assertThat(body)
+                    .hasSize(2)
+                    .extracting(SessionDto::getId)
+                    .containsExactly(1L, 2L);
         }
     }
 
@@ -203,6 +207,7 @@ public class SessionControllerTest {
         void delete_idInvalid_shouldReturnBadRequest() {
             ResponseEntity<?> response = sessionController.delete("ABC");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            verify(sessionService, never()).getById(any());
             verify(sessionService, never()).delete(any());
         }
     }
