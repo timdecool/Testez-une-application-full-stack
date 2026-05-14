@@ -4,26 +4,15 @@ import { expect } from '@jest/globals';
 
 import { TeacherService } from './teacher.service';
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
+import {createMockTeacher} from "../../testing/teacher.factory";
 
 describe('TeacherService', () => {
   let service: TeacherService;
   let httpMock: HttpTestingController;
 
   const mockTeachers = [
-    {
-      id: 1,
-      lastName: 'Portique',
-      firstName: 'Miranda',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    },
-    {
-      id: 2,
-      lastName: 'Boulon',
-      firstName: 'Michel',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
+    createMockTeacher(),
+    createMockTeacher({ id: 2, lastName: 'Boulon', firstName: 'Michel'})
   ];
 
   beforeEach(() => {

@@ -3,34 +3,14 @@ import { expect } from '@jest/globals';
 
 import { SessionApiService } from './session-api.service';
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
+import {createMockSession} from "../../../../testing/session.factory";
 
 describe('SessionsService', () => {
   let service: SessionApiService;
   let httpMock: HttpTestingController;
 
-  const mockSession = {
-    id: 1,
-    name: 'test',
-    description: '',
-    date: new Date(),
-    teacher_id: 1,
-    users: [],
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  const mockSessions = [
-    mockSession,
-    {
-      id: 2,
-      name: 'test2',
-      description: '',
-      date: new Date(),
-      teacher_id: 2,
-      users: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ];
+  const mockSession = createMockSession();
+  const mockSessions = [mockSession, createMockSession({ id: 2, name: 'test2', teacher_id: 2 })];
 
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -17,7 +17,9 @@ import { FormComponent } from './form.component';
 import {ActivatedRoute, convertToParamMap, Router} from "@angular/router";
 import {of} from "rxjs";
 import {TeacherService} from "../../../../services/teacher.service";
-import {Session} from "../../interfaces/session.interface";
+import {createMockTeacher} from "../../../../../testing/teacher.factory";
+import {createMockSession} from "../../../../../testing/session.factory";
+import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -25,22 +27,10 @@ describe('FormComponent', () => {
   let router: Router;
 
   const mockSessionService = {
-    sessionInformation: {
-      admin: true
-    }
+    sessionInformation: createMockSessionInfo({ admin: true })
   }
 
-  const mockSession: Session = {
-    id: 1,
-    name: 'test',
-    description: '',
-    date: new Date(),
-    teacher_id: 1,
-    users: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-
+  const mockSession = createMockSession();
   const mockSessionApiService = {
     detail: jest.fn().mockReturnValue(of(mockSession)),
     create: jest.fn().mockReturnValue(of(mockSession)),
@@ -48,22 +38,9 @@ describe('FormComponent', () => {
   }
 
   const mockTeachers = [
-    {
-      id: 1,
-      lastName: 'Portique',
-      firstName: 'Miranda',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    },
-    {
-      id: 2,
-      lastName: 'Boulon',
-      firstName: 'Michel',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ]
-
+    createMockTeacher(),
+    createMockTeacher({ id: 2, lastName: 'Boulon', firstName: 'Michel' })
+  ];
   const mockTeacherService = {
     all: jest.fn().mockReturnValue(of(mockTeachers))
   }
@@ -161,7 +138,7 @@ describe('FormComponent', () => {
     const compiled = initComponent();
     const title = compiled.querySelector('h1') as HTMLElement;
     expect(title.textContent).toEqual('Update session');
-  })
+  });
 
   const invalidCases: [string, Partial<typeof mockForm>, ][] = [
     ['empty name', { name: '' }],
@@ -169,7 +146,7 @@ describe('FormComponent', () => {
     ['empty teacher id', { teacher_id: null as any }],
     ['empty description ', { description: '' }],
     ['description too long', { description: 'too long '.repeat(500) }],
-  ]
+  ];
 
   it.each(invalidCases)('should disable submit when %s', (description, override) => {
     const compiled = initComponent();

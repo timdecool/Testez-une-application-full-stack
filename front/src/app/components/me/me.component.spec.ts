@@ -13,36 +13,22 @@ import { MeComponent } from './me.component';
 import {of} from "rxjs";
 import {UserService} from "../../services/user.service";
 import {Router} from "@angular/router";
+import {createMockSessionInfo} from "../../../testing/session-information.factory";
+import {createMockUser} from "../../../testing/user.factory";
 
 describe('MeComponent', () => {
   let component: MeComponent;
   let fixture: ComponentFixture<MeComponent>;
 
-  const mockUser = {
-    id: 1,
-    firstName: 'Michel',
-    lastName: 'Boulon',
-    email: 'michel.boulon@laposte.net',
-    admin: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-
+  const mockUser = createMockUser({ admin: true });
   const mockSessionService = {
-    sessionInformation: {
-      admin: true,
-      id: 1
-    },
+    sessionInformation: createMockSessionInfo({ admin: true }),
     logOut: jest.fn()
-  }
-
-  const buildUser = (overrides = {}) => ({ ...mockUser, ...overrides })
-
+  };
   const mockUserService = {
     getById: jest.fn().mockReturnValue(of(mockUser)),
     delete: jest.fn().mockReturnValue(of(null))
   }
-
   const mockRouter = { navigate: jest.fn() };
   const mockSnackBar = { open: jest.fn() };
 
@@ -96,7 +82,7 @@ describe('MeComponent', () => {
   })
 
   it('should display delete button when user is not admin', () => {
-    mockUserService.getById.mockReturnValue(of(buildUser({ admin: false })));
+    mockUserService.getById.mockReturnValue(of(createMockUser()));
     expect(initComponent().querySelector('button[color="warn"]')).toBeTruthy();
   });
 
@@ -108,7 +94,7 @@ describe('MeComponent', () => {
   })
 
   it('should delete and redirect when delete button is clicked', () => {
-    mockUserService.getById.mockReturnValue(of(buildUser({ admin: false })));
+    mockUserService.getById.mockReturnValue(of(createMockUser()));
     const deleteButton = initComponent().querySelector('button[mat-raised-button]') as HTMLButtonElement;
     deleteButton.click();
 

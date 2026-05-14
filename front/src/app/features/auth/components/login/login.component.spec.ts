@@ -9,22 +9,20 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { expect } from '@jest/globals';
 import { SessionService } from 'src/app/services/session.service';
-
 import { LoginComponent } from './login.component';
 import {of, throwError} from "rxjs";
 import {AuthService} from "../../services/auth.service";
 import {Router} from "@angular/router";
+import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
+import {createMockLoginForm} from "../../../../../testing/login-form.factory";
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
 
-  const mockForm = {
-    email: 'michel@gmail.com',
-    password: 'password123',
-  }
+  const mockForm = createMockLoginForm();
   const fillForm = (overrides = {}) => {
-    component.form.setValue({ ...mockForm, ...overrides });
+    component.form.setValue(createMockLoginForm(overrides));
     fixture.detectChanges();
   }
 
@@ -36,13 +34,8 @@ describe('LoginComponent', () => {
   const getSubmitButton = (compiled: HTMLElement) =>
     compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
 
-
-  const mockSessionInfo = {
-    token: "token"
-  }
-
   const mockAuthService = {
-    login: jest.fn().mockReturnValue(of(mockSessionInfo))
+    login: jest.fn().mockReturnValue(of(createMockSessionInfo()))
   }
 
   const mockSessionService = {
@@ -133,7 +126,7 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
 
     expect(mockAuthService.login).toHaveBeenCalledWith(mockForm);
-    expect(mockSessionService.logIn).toHaveBeenCalledWith(mockSessionInfo);
+    expect(mockSessionService.logIn).toHaveBeenCalledWith(createMockSessionInfo());
     expect(navigateSpy).toHaveBeenCalledWith(['/sessions']);
   });
 

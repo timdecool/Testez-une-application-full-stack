@@ -13,6 +13,9 @@ import {TeacherService} from "../../../../services/teacher.service";
 import {MatCardModule, MatCardTitle} from "@angular/material/card";
 import {MatIconModule} from "@angular/material/icon";
 import {ActivatedRoute, convertToParamMap, Router} from "@angular/router";
+import {createMockTeacher} from "../../../../../testing/teacher.factory";
+import {createMockSession} from "../../../../../testing/session.factory";
+import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
 
 
 describe('DetailComponent', () => {
@@ -20,19 +23,9 @@ describe('DetailComponent', () => {
   let fixture: ComponentFixture<DetailComponent>;
 
   const mockSessionService = {
-    sessionInformation: { admin: true, id: 1 }
+    sessionInformation: createMockSessionInfo({ admin: true })
   }
-
-  const mockSession = {
-    id: 1,
-    name: 'test',
-    description: '',
-    date: new Date(),
-    teacher_id: 1,
-    users: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
+  const mockSession = createMockSession();
 
   const mockSessionApiService = {
     detail: jest.fn().mockReturnValue(of(mockSession)),
@@ -41,16 +34,8 @@ describe('DetailComponent', () => {
     unParticipate: jest.fn().mockReturnValue(of(null))
   }
 
-  const mockTeacher = {
-    id: 1,
-    lastName: 'Portique',
-    firstName: 'Miranda',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-
   const mockTeacherService = {
-    detail: jest.fn().mockReturnValue(of(mockTeacher)),
+    detail: jest.fn().mockReturnValue(of(createMockTeacher())),
   }
 
   const mockActivatedRoute = {
@@ -68,7 +53,7 @@ describe('DetailComponent', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockSessionService.sessionInformation = { admin: true, id: 1 }
+    mockSessionService.sessionInformation = createMockSessionInfo({ admin: true })
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,

@@ -1,20 +1,10 @@
 import { expect } from '@jest/globals';
 
 import { SessionService } from './session.service';
-import {SessionInformation} from "../interfaces/sessionInformation.interface";
+import {createMockSessionInfo} from "../../testing/session-information.factory";
 
 describe('SessionService', () => {
   let service: SessionService;
-
-  const mockSessionInformation: SessionInformation = {
-    token: "token",
-    type: "Bearer",
-    id: 1,
-    username: "michelboulon",
-    firstName: "Michel",
-    lastName: "Boulon",
-    admin: true
-  }
 
   beforeEach(() => {
     service = new SessionService();
@@ -30,20 +20,20 @@ describe('SessionService', () => {
   });
 
   it('should set session information and isLogged on login', () => {
-    service.logIn(mockSessionInformation);
+    service.logIn(createMockSessionInfo());
     expect(service.isLogged).toBe(true);
-    expect(service.sessionInformation).toEqual(mockSessionInformation);
+    expect(service.sessionInformation).toEqual(createMockSessionInfo());
   });
 
   it('should clear session information and isLogged on logout', () => {
-    service.logIn(mockSessionInformation);
+    service.logIn(createMockSessionInfo());
     service.logOut();
     expect(service.isLogged).toBe(false);
     expect(service.sessionInformation).toBeUndefined();
   });
 
   it('should emit false on $isLogged after logout', () => {
-    service.logIn(mockSessionInformation);
+    service.logIn(createMockSessionInfo());
 
     let emittedValue: boolean | undefined;
     service.$isLogged().subscribe(v => emittedValue = v);

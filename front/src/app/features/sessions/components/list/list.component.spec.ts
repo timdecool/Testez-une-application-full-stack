@@ -9,40 +9,17 @@ import { ListComponent } from './list.component';
 import {SessionApiService} from "../../services/session-api.service";
 import {of} from "rxjs";
 import {RouterTestingModule} from "@angular/router/testing";
+import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
+import {createMockSession} from "../../../../../testing/session.factory";
 
 describe('ListComponent', () => {
   let component: ListComponent;
   let fixture: ComponentFixture<ListComponent>;
 
   const mockSessionService = {
-    sessionInformation: {
-      admin: true
-    }
+    sessionInformation: createMockSessionInfo({ admin: true })
   }
-
-  const mockSessions = [
-    {
-      id: 1,
-      name: 'test',
-      description: '',
-      date: new Date(),
-      teacher_id: 1,
-      users: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    },
-    {
-      id: 2,
-      name: 'test2',
-      description: '',
-      date: new Date(),
-      teacher_id: 2,
-      users: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ];
-
+  const mockSessions = [createMockSession(), createMockSession({ id: 2, name: "test2", teacher_id: 2})];
   const mockSessionApiService = {
     all: jest.fn().mockReturnValue(of(mockSessions))
   }
