@@ -20,7 +20,7 @@ import {createMockTeacher} from "../../../../../testing/teacher.factory";
 @Component({ template: ''})
 class DummyComponent {}
 
-describe('Session Detail Flow - Integration Test Suite', () => {
+describe('DetailComponent integration tests', () => {
   let fixture: ComponentFixture<DetailComponent>;
   let component: DetailComponent;
   let httpMock: HttpTestingController;

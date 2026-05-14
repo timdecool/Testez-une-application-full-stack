@@ -54,6 +54,10 @@ describe('RegisterComponent integration suite', () => {
     fixture.detectChanges();
   })
 
+  afterEach(() => {
+    httpMock.verify();
+  })
+
   it('should create account and redirect to login on successful submit', fakeAsync(() => {
     component.form.setValue(mockForm);
     fixture.detectChanges();
