@@ -94,6 +94,74 @@ public class AuthControllerTest {
             assertThat(body.getLastName()).isEqualTo("Boulon");
             assertThat(body.getAdmin()).isFalse();
         }
+
+        @Test
+        @DisplayName("should return JWT response with admin true when admin credentials")
+        void authenticateUser_adminCredentials_shouldReturnJwtReponseAdminTrue() {
+            LoginRequest loginRequest = new LoginRequest();
+            loginRequest.setEmail("yoga@studio.com");
+            loginRequest.setPassword("password123");
+
+            UserDetailsImpl userDetails = UserDetailsImpl.builder()
+                    .id(1L)
+                    .username("yoga@studio.com")
+                    .firstName("Michel")
+                    .lastName("Boulon")
+                    .password("hashed")
+                    .build();
+
+            User user = new User()
+                    .setEmail("yoga@studio.com")
+                    .setPassword("hashed")
+                    .setFirstName("Michel")
+                    .setLastName("Boulon")
+                    .setAdmin(true)
+                    .setId(1L);
+            Authentication authentication = mock(Authentication.class);
+
+            when(authentication.getPrincipal()).thenReturn(userDetails);
+            when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                    .thenReturn(authentication);
+            when(jwtUtils.generateJwtToken(authentication)).thenReturn("generatedToken");
+            when(userRepository.findByEmail("yoga@studio.com")).thenReturn(Optional.of(user));
+
+            ResponseEntity<?> response = authController.authenticateUser(loginRequest);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            JwtResponse body = (JwtResponse) response.getBody();
+            Assertions.assertNotNull(body);
+            assertThat(body.getToken()).isEqualTo("generatedToken");
+            assertThat(body.getId()).isEqualTo(1L);
+            assertThat(body.getUsername()).isEqualTo("yoga@studio.com");
+            assertThat(body.getFirstName()).isEqualTo("Michel");
+            assertThat(body.getLastName()).isEqualTo("Boulon");
+            assertThat(body.getAdmin()).isTrue();
+        }
+
+        @Test
+        @DisplayName("should return admin false when user not found in database")
+        void authenticateUser_userNotFound_shouldReturnAdminFalse() {
+            LoginRequest loginRequest = new LoginRequest();
+            loginRequest.setEmail("not-found@studio.com");
+            loginRequest.setPassword("password");
+
+            UserDetailsImpl userDetails = UserDetailsImpl.builder()
+                    .id(1L)
+                    .username("not-found@studio.com")
+                    .build();
+            Authentication authentication = mock(Authentication.class);
+
+            when(authentication.getPrincipal()).thenReturn(userDetails);
+            when(authenticationManager.authenticate(any())).thenReturn(authentication);
+            when(jwtUtils.generateJwtToken(authentication)).thenReturn("token");
+            when(userRepository.findByEmail("not-found@studio.com")).thenReturn(Optional.empty());
+
+            ResponseEntity<?> response = authController.authenticateUser(loginRequest);
+
+            JwtResponse body = (JwtResponse) response.getBody();
+            assertThat(body).isNotNull();
+            assertThat(body.getAdmin()).isFalse();
+        }
     }
 
     @Nested
