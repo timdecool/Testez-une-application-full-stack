@@ -4,16 +4,20 @@ export default {
   module: {
     rules: [
       {
-        test: /\.(js|ts)$/,
-        loader: '@jsdevtools/coverage-istanbul-loader',
-        options: { esModules: true },
-        enforce: 'post',
+        test: /\.ts$/,
         include: path.join(__dirname, '..', 'src'),
         exclude: [
-          /\.(e2e|spec)\.ts$/,
+          /\.(spec|e2e)\.ts$/,
           /node_modules/,
           /(ngfactory|ngstyle)\.js/,
         ],
+        use: {
+          loader: '@jsdevtools/coverage-istanbul-loader',
+          options: {
+            esModules: true,
+          },
+        },
+        enforce: 'post',
       },
     ],
   },

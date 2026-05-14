@@ -67,6 +67,9 @@
               "namedChunks": true
             },
             "e2e": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "aot": false,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
