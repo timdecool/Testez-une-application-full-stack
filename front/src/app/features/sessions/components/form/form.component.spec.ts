@@ -17,6 +17,7 @@ import { FormComponent } from './form.component';
 import {ActivatedRoute, convertToParamMap, Router} from "@angular/router";
 import {of} from "rxjs";
 import {TeacherService} from "../../../../services/teacher.service";
+import {Session} from "../../interfaces/session.interface";
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -29,7 +30,7 @@ describe('FormComponent', () => {
     }
   }
 
-  const mockSession = {
+  const mockSession: Session = {
     id: 1,
     name: 'test',
     description: '',

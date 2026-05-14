@@ -41,3 +41,28 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add("login", (isAdmin = false) => {
+  cy.intercept('POST', '/api/auth/login', {
+    body: {
+      id: 1,
+      username: 'michelb',
+      firstName: 'Michel',
+      lastName: 'Boulon',
+      admin: isAdmin
+    }
+  }).as('login');
+
+  cy.intercept('GET', '/api/session', { fixture: 'sessions' }).as('session');
+
+  cy.visit('/login');
+  cy.get('input[formControlName=email]').type('yoga@studio.com');
+  cy.get('input[formControlName=password]').type('password');
+  cy.get('button[type="submit"]').click();
+  cy.wait('@login');
+  cy.wait('@session');
+});
+
+Cypress.Commands.add('getFixtureById', (fixtureName: string, id: number) => {
+  return cy.fixture(fixtureName).then((items) => items.find(i => i.id === id));
+});
