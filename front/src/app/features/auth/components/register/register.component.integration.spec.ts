@@ -1,41 +1,38 @@
-﻿import {ComponentFixture, fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {LoginComponent} from "./login.component";
+﻿import {Component, NgZone} from "@angular/core";
+import {ComponentFixture, fakeAsync, TestBed, tick} from "@angular/core/testing";
+import {RegisterComponent} from "./register.component";
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
 import {Router} from "@angular/router";
+import {createMockRegisterForm} from "../../../../../testing/register-form.factory";
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AuthService} from "../../services/auth.service";
-import {SessionService} from "../../../../services/session.service";
-import { expect } from '@jest/globals';
-import {Component, NgZone} from "@angular/core";
-import {MatCardModule} from "@angular/material/card";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {MatCardModule} from "@angular/material/card";
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
-import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
-import {createMockLoginForm} from "../../../../../testing/login-form.factory";
+import {AuthService} from "../../services/auth.service";
+import { expect } from '@jest/globals';
 import spyOn = jest.spyOn;
 
-@Component({ template: ''})
+@Component({ template: '' })
 class DummyComponent {}
-
-describe('LoginComponent integration suite', () => {
-  let fixture: ComponentFixture<LoginComponent>;
-  let component: LoginComponent;
+describe('RegisterComponent integration suite', () => {
+  let fixture: ComponentFixture<RegisterComponent>
+  let component: RegisterComponent;
   let httpMock: HttpTestingController;
   let router: Router;
-  let ngZone: NgZone;
+  let ngZone : NgZone;
 
-  const mockForm = createMockLoginForm();
+  const mockForm = createMockRegisterForm();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LoginComponent ],
+      declarations: [ RegisterComponent ],
       imports: [
         HttpClientTestingModule,
         RouterTestingModule.withRoutes([
-          { path: 'sessions', component: DummyComponent }
+          { path: 'login', component: DummyComponent },
         ]),
         ReactiveFormsModule,
         BrowserAnimationsModule,
@@ -46,68 +43,57 @@ describe('LoginComponent integration suite', () => {
       ],
       providers: [
         AuthService,
-        SessionService
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LoginComponent);
+    fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
     ngZone = TestBed.inject(NgZone);
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   })
 
-  it('should login, update session state and navigate to /session on successful login', fakeAsync(() => {
+  it('should create account and redirect to login on successful submit', fakeAsync(() => {
     component.form.setValue(mockForm);
     fixture.detectChanges();
+
     ngZone.run(() => {
       fixture.nativeElement.querySelector('button[type="submit"]').click();
     });
 
-    const req = httpMock.expectOne('api/auth/login');
+    const req = httpMock.expectOne('api/auth/register');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(mockForm);
 
     ngZone.run(() => {
-      req.flush(createMockSessionInfo());
+      req.flush(null);
     });
     tick();
     fixture.detectChanges();
 
-    const sessionService = TestBed.inject(SessionService);
-    expect(sessionService.isLogged).toBe(true);
-    expect(sessionService.sessionInformation).toEqual(createMockSessionInfo());
-
-    expect(router.url).toBe('/sessions');
+    expect(router.url).toBe('/login');
   }));
 
-  it('should display error message and not navigate on failed login', fakeAsync(() => {
+  it('should display error message on failed registration', fakeAsync(() => {
     spyOn(router, 'navigate');
     spyOn(router, 'navigateByUrl');
 
     component.form.setValue(mockForm);
     fixture.detectChanges();
+
     ngZone.run(() => {
       fixture.nativeElement.querySelector('button[type="submit"]').click();
     });
+    const req = httpMock.expectOne('api/auth/register');
 
-    const req = httpMock.expectOne('api/auth/login');
     ngZone.run(() => {
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      req.flush('Bad Request', { status: 400, statusText: 'Bad Request' });
     });
     tick();
     fixture.detectChanges();
 
-    const sessionService = TestBed.inject(SessionService);
-    expect(sessionService.isLogged).toBe(false);
-    expect(sessionService.sessionInformation).toBeUndefined();
-
-    expect(fixture.nativeElement.querySelector('p.error')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('span.error')).toBeTruthy();
     expect(router.navigate).not.toHaveBeenCalled();
     expect(router.navigateByUrl).not.toHaveBeenCalled();
   }));

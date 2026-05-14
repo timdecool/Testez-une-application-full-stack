@@ -25,8 +25,8 @@ export class RegisterComponent {
       '',
       [
         Validators.required,
-        Validators.minLength(3), // TODO: valider modif ?
-        Validators.maxLength(20) // TODO: valid modif ?
+        Validators.minLength(3),
+        Validators.maxLength(20)
       ]
     ],
     lastName: [
