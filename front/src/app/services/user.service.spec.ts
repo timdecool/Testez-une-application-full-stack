@@ -3,20 +3,13 @@ import { expect } from '@jest/globals';
 
 import { UserService } from './user.service';
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
+import {createMockUser} from "../../testing/user.factory";
 
 describe('UserService', () => {
   let service: UserService;
   let httpMock: HttpTestingController;
 
-  const mockUser = {
-    id: 1,
-    firstName: 'Michel',
-    lastName: 'Boulon',
-    email: 'michel@test.com',
-    admin: false,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
+  const mockUser = createMockUser();
 
   beforeEach(() => {
     TestBed.configureTestingModule({

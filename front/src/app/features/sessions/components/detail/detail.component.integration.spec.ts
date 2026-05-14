@@ -12,10 +12,10 @@ import {TeacherService} from "../../../../services/teacher.service";
 import { expect } from '@jest/globals';
 import {MatCardModule} from "@angular/material/card";
 import {MatIconModule} from "@angular/material/icon";
-import {Session} from "../../interfaces/session.interface";
-import {SessionInformation} from "../../../../interfaces/sessionInformation.interface";
-import {Teacher} from "../../../../interfaces/teacher.interface";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
+import {createMockSession} from "../../../../../testing/session.factory";
+import {createMockTeacher} from "../../../../../testing/teacher.factory";
 
 @Component({ template: ''})
 class DummyComponent {}
@@ -27,36 +27,9 @@ describe('Session Detail Flow - Integration Test Suite', () => {
   let router: Router;
   let sessionService: SessionService;
 
-  const mockSessionInfo: SessionInformation = {
-    token: 'token',
-    type: 'Bearer',
-    id: 1,
-    username: 'michelboulon',
-    firstName: 'Michel',
-    lastName: 'Boulon',
-    admin: false
-  };
-  const mockSessionInfoAdmin: SessionInformation = { ...mockSessionInfo, admin: true };
-
-  const mockSession: Session = {
-    id: 1,
-    name: "test session",
-    description: "",
-    date: new Date(),
-    teacher_id: 1,
-    users: [],
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  const mockSessionParticipate: Session = { ...mockSession,  users: [1] };
-
-  const mockTeacher: Teacher = {
-    id: 1,
-    lastName: 'Portique',
-    firstName: 'Miranda',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
+  const mockSession = createMockSession();
+  const mockSessionParticipate = createMockSession({ users: [1] });
+  const mockTeacher = createMockTeacher();
 
   const initComponent = () => {
     fixture = TestBed.createComponent(DetailComponent);
@@ -103,7 +76,7 @@ describe('Session Detail Flow - Integration Test Suite', () => {
     httpMock = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
     sessionService = TestBed.inject(SessionService);
-    sessionService.logIn(mockSessionInfo);
+    sessionService.logIn(createMockSessionInfo());
   });
 
   afterEach(() => {
@@ -164,7 +137,7 @@ describe('Session Detail Flow - Integration Test Suite', () => {
 
   it('should delete session and navigate to /sessions when admin', fakeAsync(() => {
     const ngZone = TestBed.inject(NgZone);
-    sessionService.logIn(mockSessionInfoAdmin);
+    sessionService.logIn(createMockSessionInfo({ admin: true }));
     const compiled = initComponent();
     flushInitRequests();
 

@@ -13,6 +13,8 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatIconModule} from "@angular/material/icon";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
+import {createMockSessionInfo} from "../../../../../testing/session-information.factory";
+import {createMockLoginForm} from "../../../../../testing/login-form.factory";
 
 @Component({ template: ''})
 class DummyComponent {}
@@ -23,20 +25,7 @@ describe('Auth Flow - Integration Test Suite', () => {
   let httpMock: HttpTestingController;
   let router: Router;
 
-  const mockForm = {
-    email: 'michel@test.com',
-    password: 'password123',
-  }
-
-  const mockSessionInfo = {
-    token: 'token',
-    type: 'Bearer',
-    id: 1,
-    username: 'michelboulon',
-    firstName: 'Michel',
-    lastName: 'Boulon',
-    admin: false
-  };
+  const mockForm = createMockLoginForm();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -84,14 +73,14 @@ describe('Auth Flow - Integration Test Suite', () => {
     expect(req.request.body).toEqual(mockForm);
 
     ngZone.run(() => {
-      req.flush(mockSessionInfo);
+      req.flush(createMockSessionInfo());
     });
     tick();
     fixture.detectChanges();
 
     const sessionService = TestBed.inject(SessionService);
     expect(sessionService.isLogged).toBe(true);
-    expect(sessionService.sessionInformation).toEqual(mockSessionInfo);
+    expect(sessionService.sessionInformation).toEqual(createMockSessionInfo());
 
     expect(router.url).toBe('/sessions');
   }));

@@ -7,11 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { expect, it } from '@jest/globals';
-
 import { RegisterComponent } from './register.component';
 import {of, throwError} from "rxjs";
 import {AuthService} from "../../services/auth.service";
 import {Router} from "@angular/router";
+import {createMockRegisterForm} from "../../../../../testing/register-form.factory";
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -20,16 +20,9 @@ describe('RegisterComponent', () => {
   const mockAuthService = {
     register: jest.fn().mockReturnValue(of(null))
   }
-
-  const mockForm = {
-    firstName: 'Michel',
-    lastName: 'Boulon',
-    email: 'michel@gmail.com',
-    password: 'password123',
-  }
-
+  const mockForm = createMockRegisterForm();
   const fillForm = (overrides = {}) => {
-    component.form.setValue({ ...mockForm, ...overrides });
+    component.form.setValue(createMockRegisterForm(overrides));
     fixture.detectChanges();
   }
 

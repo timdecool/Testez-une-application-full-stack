@@ -2,32 +2,17 @@
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
 import {TestBed } from "@angular/core/testing";
 import { expect } from '@jest/globals';
+import {createMockSessionInfo} from "../../../../testing/session-information.factory";
+import {createMockRegisterForm} from "../../../../testing/register-form.factory";
+import {createMockLoginForm} from "../../../../testing/login-form.factory";
 
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
 
-  const mockRegister = {
-    email: 'test@test.com',
-    password: 'password123',
-    firstName: 'Michel',
-    lastName: 'Boulon'
-  };
-
-  const mockLogin = {
-    email: 'test@test.com',
-    password: 'password123'
-  };
-
-  const mockSessionInformation = {
-    token: 'token',
-    type: 'Bearer',
-    id: 1,
-    username: 'michelb',
-    firstName: 'Michel',
-    lastName: 'Boulon',
-    admin: false
-  };
+  const mockRegister = createMockRegisterForm();
+  const mockLogin = createMockLoginForm();
+  const mockSessionInformation = createMockSessionInfo();
 
   beforeEach(() => {
     TestBed.configureTestingModule({
