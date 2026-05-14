@@ -6,11 +6,9 @@ import com.openclassrooms.starterjwt.models.Session;
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.repository.SessionRepository;
 import com.openclassrooms.starterjwt.repository.UserRepository;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -81,8 +79,10 @@ class SessionServiceTest {
 
             List<Session> foundSessions = sessionService.findAll();
             verify(sessionRepository, times(1)).findAll();
-            assertThat(foundSessions.size()).isEqualTo(3);
-            assertThat(foundSessions.get(0).getId()).isEqualTo(1L);
+            assertThat(foundSessions)
+                    .hasSize(3)
+                    .extracting(Session::getId)
+                    .containsExactly(1L, 2L, 3L);
         }
 
         @Test
@@ -105,9 +105,18 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("update: should update session with given id")
+        @DisplayName("update: should update session with given id and return it")
         public void update_shouldReturnSavedSession() {
+            Session updatedSession = new Session()
+                    .setId(1L)
+                    .setName("Yoga du soir");
+            when(sessionRepository.save(any(Session.class))).thenReturn(updatedSession);
 
+            Session result = sessionService.update(1L, updatedSession);
+
+            verify(sessionRepository, times(1)).save(updatedSession);
+            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getName()).isEqualTo("Yoga du soir");
         }
     }
     @Nested
@@ -153,11 +162,7 @@ class SessionServiceTest {
         @Test
         @DisplayName("When session does not exist, should throw NotFoundException")
         public void participate_sessionNotFound_shouldThrowNotFoundException() {
-            User user = new User()
-                    .setId(1L);
             when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
             assertThatThrownBy(() -> sessionService.participate(1L, 1L))
                     .isInstanceOf(NotFoundException.class);
             verify(sessionRepository, never()).save(any());
@@ -186,6 +191,7 @@ class SessionServiceTest {
         public void noLongerParticipate_userParticipating_shouldSaveSession() {
             List<User> participants = new ArrayList<>();
             participants.add(new User().setId(1L));
+            participants.add(new User().setId(2L));
             Session session = new Session()
                     .setId(1L)
                     .setUsers(participants);
@@ -197,7 +203,8 @@ class SessionServiceTest {
             verify(sessionRepository).save(sessionCaptor.capture());
             Session savedSession = sessionCaptor.getValue();
             assertThat(savedSession.getUsers())
-                    .hasSize(0);
+                    .hasSize(1)
+                    .doesNotContain(new User().setId(1L));
         }
 
         @Test
@@ -217,10 +224,17 @@ class SessionServiceTest {
         }
 
         @Test
+        @DisplayName("When user does not exist, should throw NotFoundException")
+        public void noLongerParticipate_userNotFound_shouldThrowNotFoundException() {
+            when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
+            assertThatThrownBy(() -> sessionService.noLongerParticipate(1L, 1L))
+                    .isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
         @DisplayName("When session does not exist, should throw NotFoundException")
         public void noLongerParticipate_sessionNotFound_shouldThrowNotFoundException() {
             when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
-
             assertThatThrownBy(() -> sessionService.noLongerParticipate(1L, 1L))
                     .isInstanceOf(NotFoundException.class);
             verify(sessionRepository, never()).save(any());

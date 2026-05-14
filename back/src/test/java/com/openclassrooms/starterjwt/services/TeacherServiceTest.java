@@ -40,9 +40,7 @@ class TeacherServiceTest {
     @Test
     public void findById_incorrectId_returnsNull() {
         when(teacherRepository.findById(2L)).thenReturn(Optional.empty());
-
         Teacher foundTeacher = teacherService.findById(2L);
-
         Assertions.assertThat(foundTeacher).isNull();
     }
 
@@ -56,7 +54,10 @@ class TeacherServiceTest {
 
         List<Teacher> allTeachers = teacherService.findAll();
 
-        Assertions.assertThat(allTeachers.size()).isEqualTo(3);
+        Assertions.assertThat(allTeachers)
+                .hasSize(3)
+                .extracting(Teacher::getId)
+                .containsExactly(1L, 2L, 3L);
     }
 
 }
