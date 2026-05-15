@@ -105,10 +105,6 @@
                 </configuration>
             </plugin>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.5</version>
@@ -119,14 +115,19 @@
 						</goals>
 					</execution>
 					<!-- attached to Maven test phase -->
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/dto/*</exclude>
+                                <exclude>**/*Dto.*</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
 					<execution>
 						<id>jacoco-check</id>
 						<goals>
@@ -135,8 +136,8 @@
 						<configuration>
 							<rules>
 								<rule>
-									<element>PACKAGE</element>
-									<limits>
+                                    <element>PACKAGE</element>
+                                    <limits>
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
@@ -147,10 +148,8 @@
 							</rules>
 						</configuration>
 					</execution>
-
 				</executions>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
