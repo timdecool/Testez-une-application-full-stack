@@ -1,6 +1,8 @@
 package com.openclassrooms.starterjwt.security.jwt;
 
 import com.openclassrooms.starterjwt.security.services.UserDetailsImpl;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,6 +76,41 @@ class JwtUtilsTest {
         String token = jwtUtils.generateJwtToken(auth);
 
         assertThat(jwtUtils.validateJwtToken(token)).isFalse();
+    }
+
+    @Test
+    @DisplayName("validateJwtToken: invalid signature should return false")
+    void validateJwtToken_invalidSignature_shouldReturnFalse() {
+        // Token signé avec une autre clé
+        String otherSecret = "autreSecretTresLongPourLesTests1234567890";
+        String tokenWithWrongSignature = Jwts.builder()
+                .setSubject("test@test.com")
+                .signWith(SignatureAlgorithm.HS512, otherSecret)
+                .compact();
+
+        assertThat(jwtUtils.validateJwtToken(tokenWithWrongSignature)).isFalse();
+    }
+
+    @Test
+    @DisplayName("validateJwtToken: malformed token should return false")
+    void validateJwtToken_malformedToken_shouldReturnFalse() {
+        assertThat(jwtUtils.validateJwtToken("not.a.valid.jwt.token")).isFalse();
+    }
+
+    @Test
+    @DisplayName("validateJwtToken: empty token should return false")
+    void validateJwtToken_emptyToken_shouldReturnFalse() {
+        assertThat(jwtUtils.validateJwtToken("")).isFalse();
+    }
+
+    @Test
+    @DisplayName("validateJwtToken: unsupported token should return false")
+    void validateJwtToken_unsupportedToken_shouldReturnFalse() {
+        // Token sans signature (algorithme "none")
+        String unsignedToken = Jwts.builder()
+                .setSubject("test@test.com")
+                .compact(); // ← pas de signature
+        assertThat(jwtUtils.validateJwtToken(unsignedToken)).isFalse();
     }
 
     @Test
