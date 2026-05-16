@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.mockito.Mockito.doNothing;
@@ -44,6 +45,8 @@ public class UserControllerIntegrationTest {
                 .lastName("Boulon")
                 .email("michel.boulon@laposte.net")
                 .password("hashed")
+                .createdAt(LocalDateTime.of(2026, 5, 15, 0, 0))
+                .updatedAt(LocalDateTime.of(2026, 5, 15, 0, 0))
                 .build();
     }
 

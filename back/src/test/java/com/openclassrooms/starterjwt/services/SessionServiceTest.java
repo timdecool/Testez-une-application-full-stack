@@ -123,7 +123,7 @@ class SessionServiceTest {
     @DisplayName("participate: add user to session")
     class ParticipateTest {
         @Test
-        @DisplayName("When user is not already in session, should add the user and save the session")
+        @DisplayName("should add the user and save the session when user is not already in session")
         public void participate_newParticipant_shouldSaveSession() {
             User user = new User().setId(1L);
             Session session = new Session()
@@ -143,7 +143,7 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("When user is already participating, should throw BadRequestException")
+        @DisplayName("should throw BadRequestException when user is already participating")
         public void participate_alreadyParticipant_shouldThrowBadRequestException() {
             User user = new User().setId(1L);
             List<User> participants = new ArrayList<>();
@@ -160,7 +160,7 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("When session does not exist, should throw NotFoundException")
+        @DisplayName("should throw NotFoundException when session does not exist")
         public void participate_sessionNotFound_shouldThrowNotFoundException() {
             when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
             assertThatThrownBy(() -> sessionService.participate(1L, 1L))
@@ -169,7 +169,7 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("When user does not exist, should throw NotFoundException")
+        @DisplayName("should throw NotFoundException when user does not exist")
         public void participate_userNotFound_shouldThrowNotFoundException() {
             Session session = new Session()
                     .setId(1L)
@@ -187,7 +187,7 @@ class SessionServiceTest {
     @DisplayName("noLongerParticipate: remove participating user from session")
     class NoLongerParticipateTest {
         @Test
-        @DisplayName("When session exists and user participates, should remove user and save session")
+        @DisplayName("should remove user and save session when session exists and user participates")
         public void noLongerParticipate_userParticipating_shouldSaveSession() {
             List<User> participants = new ArrayList<>();
             participants.add(new User().setId(1L));
@@ -208,7 +208,7 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("When given user id is not in session participants, should throw BadRequestException")
+        @DisplayName("should throw BadRequestException when given user id is not in session participants")
         public void noLongerParticipate_userNotParticipating_shouldThrowBadRequestException() {
             List<User> participants = new ArrayList<>();
             participants.add(new User().setId(2L));
@@ -224,7 +224,7 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("When user does not exist, should throw NotFoundException")
+        @DisplayName("should throw NotFoundException when user does not exist")
         public void noLongerParticipate_userNotFound_shouldThrowNotFoundException() {
             when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
             assertThatThrownBy(() -> sessionService.noLongerParticipate(1L, 1L))
@@ -232,7 +232,7 @@ class SessionServiceTest {
         }
 
         @Test
-        @DisplayName("When session does not exist, should throw NotFoundException")
+        @DisplayName("should throw NotFoundException when session does not exist")
         public void noLongerParticipate_sessionNotFound_shouldThrowNotFoundException() {
             when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
             assertThatThrownBy(() -> sessionService.noLongerParticipate(1L, 1L))
