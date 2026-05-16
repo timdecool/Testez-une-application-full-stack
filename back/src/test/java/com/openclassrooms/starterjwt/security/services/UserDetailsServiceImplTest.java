@@ -27,7 +27,7 @@ class UserDetailsServiceImplTest {
     UserRepository userRepository;
 
     @Test
-    @DisplayName("loadUserByUsername: should return UserDetails when user exists")
+    @DisplayName("should return UserDetails when user exists")
     void loadUserByUsername_userExists_shouldReturnUserDetails() {
         User user = new User()
                 .setEmail("michel.boulon@laposte.net")
@@ -43,7 +43,7 @@ class UserDetailsServiceImplTest {
     }
 
     @Test
-    @DisplayName("loadUserByUsername: should throw UsernameNotFoundException when user not found")
+    @DisplayName("should throw UsernameNotFoundException when user not found")
     void loadUserByUsername_userNotFound_shouldThrowException() {
         when(userRepository.findByEmail("unknown@test.com")).thenReturn(Optional.empty());
         assertThatThrownBy(() ->

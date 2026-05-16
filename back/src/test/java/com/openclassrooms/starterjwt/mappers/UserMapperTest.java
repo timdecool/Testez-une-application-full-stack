@@ -14,6 +14,7 @@ import com.openclassrooms.starterjwt.services.TeacherService;
 import com.openclassrooms.starterjwt.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,60 +62,67 @@ class UserMapperTest {
         mockUserDto.setAdmin(false);
     }
 
-    @Test
-    @DisplayName("toDto: should map session fields")
-    void toDto_shouldMapAllFields() {
-        UserDto dto = userMapper.toDto(mockUser);
-        assertThat(dto.getId()).isEqualTo(1L);
-        assertThat(dto.getFirstName()).isEqualTo("Michel");
-        assertThat(dto.getLastName()).isEqualTo("Boulon");
-        assertThat(dto.getPassword()).isEqualTo("password");
-        assertThat(dto.getEmail()).isEqualTo("michel.boulon@laposte.net");
-        assertThat(dto.isAdmin()).isFalse();
-        assertThat(dto.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 5, 15, 0, 0));
-        assertThat(dto.getUpdatedAt()).isEqualTo(LocalDateTime.of(2026, 5, 15, 0, 0));
+    @Nested
+    @DisplayName("to dto")
+    class ToDtoTest {
+        @Test
+        @DisplayName("should map session fields")
+        void toDto_shouldMapAllFields() {
+            UserDto dto = userMapper.toDto(mockUser);
+            assertThat(dto.getId()).isEqualTo(1L);
+            assertThat(dto.getFirstName()).isEqualTo("Michel");
+            assertThat(dto.getLastName()).isEqualTo("Boulon");
+            assertThat(dto.getPassword()).isEqualTo("password");
+            assertThat(dto.getEmail()).isEqualTo("michel.boulon@laposte.net");
+            assertThat(dto.isAdmin()).isFalse();
+            assertThat(dto.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 5, 15, 0, 0));
+            assertThat(dto.getUpdatedAt()).isEqualTo(LocalDateTime.of(2026, 5, 15, 0, 0));
+        }
+
+        @Test
+        @DisplayName("null session should return null")
+        void toDto_nullSession_shouldReturnNull() {
+            assertThat(userMapper.toDto((User) null)).isNull();
+        }
+
+        @Test
+        @DisplayName("should map entity list")
+        void toDto_shouldMapList() {
+            List<User> users = new ArrayList<>();
+            users.add(mockUser);
+            List<UserDto> dtos = userMapper.toDto(users);
+            assertThat(dtos).hasSize(1).extracting(UserDto::getId).containsExactly(1L);
+        }
     }
 
-    @Test
-    @DisplayName("toDto: null session should return null")
-    void toDto_nullSession_shouldReturnNull() {
-        assertThat(userMapper.toDto((User) null)).isNull();
-    }
+    @Nested
+    @DisplayName("to entity")
+    class ToEntityTest {
+        @Test
+        @DisplayName("toEntity: should map dto fields correctly")
+        void toEntity_shouldMapAllFields() {
+            User user = userMapper.toEntity(mockUserDto);
+            assertThat(user.getId()).isEqualTo(1L);
+            assertThat(user.getFirstName()).isEqualTo(("Michel"));
+            assertThat(user.getLastName()).isEqualTo(("Boulon"));
+            assertThat(user.getEmail()).isEqualTo(("michel.boulon@laposte.net"));
+            assertThat(user.getPassword()).isEqualTo(("password"));
+        }
 
-    @Test
-    @DisplayName("toDto: should map entity list")
-    void toDto_shouldMapList() {
-        List<User> users = new ArrayList<>();
-        users.add(mockUser);
-        List<UserDto> dtos = userMapper.toDto(users);
-        assertThat(dtos).hasSize(1).extracting(UserDto::getId).containsExactly(1L);
-    }
+        @Test
+        @DisplayName("toEntity: null dto should return null")
+        void toEntity_nullDto_shouldReturnNull() {
+            assertThat(userMapper.toEntity((UserDto) null)).isNull();
+        }
 
-    @Test
-    @DisplayName("toEntity: should map dto fields correctly")
-    void toEntity_shouldMapAllFields() {
-        User user = userMapper.toEntity(mockUserDto);
+        @Test
+        @DisplayName("toEntity: should map dto list")
+        void toEntity_shouldMapList() {
+            List<UserDto> userDtos = new ArrayList<>();
+            userDtos.add(mockUserDto);
 
-        assertThat(user.getId()).isEqualTo(1L);
-        assertThat(user.getFirstName()).isEqualTo(("Michel"));
-        assertThat(user.getLastName()).isEqualTo(("Boulon"));
-        assertThat(user.getEmail()).isEqualTo(("michel.boulon@laposte.net"));
-        assertThat(user.getPassword()).isEqualTo(("password"));
-    }
-
-    @Test
-    @DisplayName("toEntity: null dto should return null")
-    void toEntity_nullDto_shouldReturnNull() {
-        assertThat(userMapper.toEntity((UserDto) null)).isNull();
-    }
-
-    @Test
-    @DisplayName("toEntity: should map dto list")
-    void toEntity_shouldMapList() {
-        List<UserDto> userDtos = new ArrayList<>();
-        userDtos.add(mockUserDto);
-
-        List<User> users = userMapper.toEntity(userDtos);
-        assertThat(users).hasSize(1).extracting(User::getId).containsExactly(1L);
+            List<User> users = userMapper.toEntity(userDtos);
+            assertThat(users).hasSize(1).extracting(User::getId).containsExactly(1L);
+        }
     }
 }

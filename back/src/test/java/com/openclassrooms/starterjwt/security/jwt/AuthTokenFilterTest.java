@@ -33,10 +33,8 @@ class AuthTokenFilterTest {
     UserDetailsServiceImpl userDetailsService;
 
     @Test
-    @DisplayName("doFilterInternal: valid token should set authentication")
-    void doFilterInternal_validToken_shouldSetAuthentication()
-            throws ServletException, IOException {
-        // ARRANGE
+    @DisplayName("should set authentication with valid token")
+    void doFilterInternal_validToken_shouldSetAuthentication() throws ServletException, IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
@@ -52,20 +50,17 @@ class AuthTokenFilterTest {
         when(jwtUtils.getUserNameFromJwtToken("valid-token")).thenReturn("test@test.com");
         when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(userDetails);
 
-        // ACT
         authTokenFilter.doFilterInternal(request, response, filterChain);
 
-        // ASSERT
-        verify(filterChain).doFilter(request, response); // ← filtre continue
+        verify(filterChain).doFilter(request, response);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication().getName())
                 .isEqualTo("test@test.com");
     }
 
     @Test
-    @DisplayName("doFilterInternal: invalid token should not set authentication")
-    void doFilterInternal_invalidToken_shouldNotSetAuthentication()
-            throws ServletException, IOException {
+    @DisplayName("should not set authentication with invalid token")
+    void doFilterInternal_invalidToken_shouldNotSetAuthentication() throws ServletException, IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
@@ -74,21 +69,20 @@ class AuthTokenFilterTest {
         when(jwtUtils.validateJwtToken("invalid-token")).thenReturn(false);
 
         authTokenFilter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain).doFilter(request, response); // ← filtre continue quand même
+        verify(filterChain).doFilter(request, response);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(userDetailsService, never()).loadUserByUsername(any());
     }
 
     @Test
-    @DisplayName("doFilterInternal: no token should not set authentication")
+    @DisplayName("should not set authentication with no token")
     void doFilterInternal_noToken_shouldNotSetAuthentication()
             throws ServletException, IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
-        when(request.getHeader("Authorization")).thenReturn(null); // ← pas de header
+        when(request.getHeader("Authorization")).thenReturn(null);
 
         authTokenFilter.doFilterInternal(request, response, filterChain);
 
@@ -98,7 +92,7 @@ class AuthTokenFilterTest {
     }
 
     @Test
-    @DisplayName("doFilterInternal: exception should not break filter chain")
+    @DisplayName("exception should not break filter chain")
     void doFilterInternal_exception_shouldContinueFilterChain()
             throws ServletException, IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -108,9 +102,7 @@ class AuthTokenFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
         when(jwtUtils.validateJwtToken(any())).thenThrow(new RuntimeException("Error"));
 
-        // Le filtre catch l'exception et continue
         authTokenFilter.doFilterInternal(request, response, filterChain);
-
         verify(filterChain).doFilter(request, response);
     }
 
