@@ -126,6 +126,7 @@
                                 <exclude>**/dto/*</exclude>
                                 <exclude>**/*Dto.*</exclude>
                                 <exclude>**/payload/**/*</exclude>
+                                <exclude>**/models/*</exclude>
                             </excludes>
                         </configuration>
                     </execution>
