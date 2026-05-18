@@ -1,11 +1,8 @@
 ﻿# P5 - Testez une application full-stack
-___
-
 **Auteur :** Timothé DECOOL
 **Date : 18/05/2026**
 
 ## Présentation projet
-___
 Projet réalisé dans le cadre de la formation "Développeur Full-Stack - Java et Angular" sur OpenClassrooms. Le code applicatif a été réalisé en amont pour une application de gestion et réservation de sessions de yoga.
 
 J'ai réalisé dans ce contexte une suite de tests pour valider la qualité de l'application.
@@ -13,7 +10,6 @@ J'ai réalisé dans ce contexte une suite de tests pour valider la qualité de l
 - **back-end :** tests unitaires et d'intégration avec JUnit et Mockito.
 
 ## Installation
-___
 Clonez le projet depuis le dépôt distant.
 
 > git clone https://github.com/timdecool/Testez-une-application-full-stack
@@ -33,7 +29,6 @@ Pour installer la base de donnée, accéder à mysql via ligne de commande ou ph
 > back/src/test/resources.data.sql
 
 ## Lancement
-___
 Pour lancer l'application, lancer les commandes suivantes.
 
 ### Front-end
@@ -49,8 +44,6 @@ Les identifiants pour accéder à l'application en tant qu'administrateur sont l
 - password: test!1234
 
 ## Tests
-___
-
 ### Tests front-end E2E
 
 Lancer les tests end-to-end via la ligne de commande, puis générer le coverage.
