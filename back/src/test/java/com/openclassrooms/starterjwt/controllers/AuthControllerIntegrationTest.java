@@ -7,7 +7,6 @@ import com.openclassrooms.starterjwt.payload.request.SignupRequest;
 import com.openclassrooms.starterjwt.repository.UserRepository;
 import com.openclassrooms.starterjwt.security.services.UserDetailsImpl;
 import org.junit.jupiter.api.*;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,20 +15,23 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
+import javax.transaction.Transactional;
+import java.util.NoSuchElementException;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
 @DisplayName("AuthController: integration tests")
 public class AuthControllerIntegrationTest {
 
@@ -39,27 +41,36 @@ public class AuthControllerIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @MockBean
-    protected AuthenticationManager authenticationManager;
+    @Autowired
+    protected UserRepository userRepository;
 
     @MockBean
-    protected UserRepository userRepository;
+    protected AuthenticationManager authenticationManager;
 
     @Nested
     @DisplayName("Authenticate user integration: POST /api/auth/login")
     class AuthenticateUserIntegrationTest {
+
         private LoginRequest loginRequest;
         private UserDetailsImpl mockUserDetails;
         private Authentication mockAuthentication;
 
         @BeforeEach
         void buildMockData() {
+            User user = new User()
+                    .setEmail("michel.boulon@laposte.net")
+                    .setLastName("Boulon")
+                    .setFirstName("Michel")
+                    .setPassword("encoded")
+                    .setAdmin(false);
+            userRepository.save(user);
+
             loginRequest = new LoginRequest();
             loginRequest.setEmail("michel.boulon@laposte.net");
             loginRequest.setPassword("password");
 
             mockUserDetails = UserDetailsImpl.builder()
-                    .id(1L)
+                    .id(user.getId())
                     .username("michel.boulon@laposte.net")
                     .firstName("Michel")
                     .lastName("Boulon")
@@ -73,19 +84,12 @@ public class AuthControllerIntegrationTest {
         @Test
         @DisplayName("should return jwt and userDetails on valid credentials")
         void authenticateUser_shouldReturnJwtAndUserDetails() throws Exception {
-            User user = new User()
-                    .setEmail("michel.boulon@laposte.net")
-                    .setAdmin(false);
-
             when(authenticationManager.authenticate(any())).thenReturn(mockAuthentication);
-            when(userRepository.findByEmail("michel.boulon@laposte.net")).thenReturn(Optional.of(user));
-
             mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(loginRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.token").isNotEmpty())   // le vrai JwtUtils génère un token
-                    .andExpect(jsonPath("$.id").value(1L))
+                    .andExpect(jsonPath("$.token").isNotEmpty())
                     .andExpect(jsonPath("$.username").value("michel.boulon@laposte.net"))
                     .andExpect(jsonPath("$.firstName").value("Michel"))
                     .andExpect(jsonPath("$.lastName").value("Boulon"))
@@ -95,18 +99,29 @@ public class AuthControllerIntegrationTest {
         @Test
         @DisplayName("should return admin true when user is admin")
         void authenticateUser_adminUser_shouldReturnIsAdminTrue() throws Exception {
-            User adminUser = new User()
-                    .setEmail("michel.boulon@laposte.net")
-                    .setAdmin(true);
+            User adminUser = userRepository.findByEmail("michel.boulon@laposte.net").orElseThrow(NoSuchElementException::new);
+            adminUser.setAdmin(true);
+            userRepository.save(adminUser);
 
             when(authenticationManager.authenticate(any())).thenReturn(mockAuthentication);
-            when(userRepository.findByEmail(any())).thenReturn(Optional.of(adminUser));
 
             mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(loginRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.admin").value(true));
+        }
+
+        @Test
+        @DisplayName("should return isAdmin false when user not found in db")
+        void authenticateUser_userNotFound_shouldReturnIsAdminFalse() throws Exception {
+            userRepository.deleteAll();
+            when(authenticationManager.authenticate(any())).thenReturn(mockAuthentication);
+            mockMvc.perform(post("/api/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(loginRequest)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.admin").value(false));
         }
 
         @Test
@@ -130,21 +145,6 @@ public class AuthControllerIntegrationTest {
                             .content(objectMapper.writeValueAsString(loginRequest)))
                     .andExpect(status().isBadRequest());
         }
-
-        @Test
-        @DisplayName("should return isAdmin false when user not found in db")
-        void authenticateUser_userNotFound_shouldReturnIsAdminFalse() throws Exception {
-            when(authenticationManager.authenticate(any()))
-                    .thenReturn(mockAuthentication);
-            when(userRepository.findByEmail(any()))
-                    .thenReturn(Optional.empty());
-
-            mockMvc.perform(post("/api/auth/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(loginRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.admin").value(false));
-        }
     }
 
     @Nested
@@ -165,42 +165,48 @@ public class AuthControllerIntegrationTest {
         @Test
         @DisplayName("should register user and return 200 status")
         void registerUser_shouldRegisterUser() throws Exception {
-            when(userRepository.existsByEmail("michel.boulon@laposte.net")).thenReturn(false);
-
             mockMvc.perform(post("/api/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(signupRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(signupRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.message").value("User registered successfully!"));
 
-            ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-            verify(userRepository).save(userCaptor.capture());
-            assertThat(userCaptor.getValue().getPassword())
+            User saved = userRepository.findByEmail("michel.boulon@laposte.net")
+                    .orElseThrow(NoSuchElementException::new);
+            assertThat(saved.getPassword())
                     .isNotEqualTo("password")
                     .startsWith("$2a$");
         }
 
         @Test
-        @DisplayName("should return 400 status when email already exists")
+        @DisplayName("should return 400 when email already exists")
         void registerUser_emailExists_shouldReturnBadRequest() throws Exception {
-            when(userRepository.existsByEmail("michel.boulon@laposte.net")).thenReturn(true);
+            userRepository.save(new User()
+                    .setEmail("michel.boulon@laposte.net")
+                    .setLastName("Boulon")
+                    .setFirstName("Michel")
+                    .setPassword("encoded")
+                    .setAdmin(false));
+
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(signupRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("Error: Email is already taken!"));
-            verify(userRepository, never()).save(any(User.class));
+
+            assertThat(userRepository.findAll()).hasSize(1);
         }
 
         @Test
-        @DisplayName("should return 400 status when body is invalid")
+        @DisplayName("should return 400 when body is invalid")
         void registerUser_bodyInvalid_shouldReturnBadRequest() throws Exception {
             signupRequest.setLastName(null);
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(signupRequest)))
                     .andExpect(status().isBadRequest());
-            verify(userRepository, never()).save(any(User.class));
+
+            assertThat(userRepository.findAll()).isEmpty();
         }
     }
 }
